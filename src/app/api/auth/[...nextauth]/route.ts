@@ -100,5 +100,4 @@ const handler = NextAuth(options)
 
 export { handler as GET, handler as POST }
 
-// Export the config separately for middleware
 export { options as authOptions }

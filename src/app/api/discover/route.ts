@@ -14,7 +14,6 @@ export async function GET() {
       }
     })
 
-    // Remove sensitive information
     const sanitizedUsers = users.map(user => {
       const { password, ...rest } = user
       return rest
