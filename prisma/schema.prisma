@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  MENTOR
+  MENTEE
+}
+
+enum RequestStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  REJECTED
+}
+
+model User {
+  id       String   @id @default(cuid())
+  name     String
+  email    String   @unique
+  password String
+  role     UserRole
+  profile  Profile?
+
+  sentRequests     MentorshipRequest[] @relation("SentRequests")
+  receivedRequests MentorshipRequest[] @relation("ReceivedRequests")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
+model Profile {
+  id        String   @id @default(cuid())
+  bio       String?  @db.Text
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @unique
+  skills    Skill[]
+  interests Interest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Skill {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  profiles Profile[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+
+model Interest {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  profiles Profile[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+
+model MentorshipRequest {
+  id         String        @id @default(cuid())
+  sender     User          @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  senderId   String
+  receiver   User          @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+  receiverId String
+  status     RequestStatus @default(PENDING)
+  message    String?       @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([status])
+}
